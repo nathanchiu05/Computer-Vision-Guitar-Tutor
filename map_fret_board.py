@@ -3,7 +3,7 @@ import cv2.aruco as aruco
 import numpy as np
 from collections import deque
 
-cap = cv2.VideoCapture(0)
+cap = cv2.VideoCapture(1)
 aruco_dict = aruco.getPredefinedDictionary(aruco.DICT_4X4_1000) #dictionary conaining the aruco markers
 parameters = aruco.DetectorParameters()
 detector = aruco.ArucoDetector(aruco_dict, parameters)
@@ -79,13 +79,69 @@ while True:
                         quad_points["BR"], quad_points["BL"]], dtype=np.int32)
         cv2.polylines(display, [pts], isClosed=True, color=(0,0,255), thickness=3)
 
+        # Calculate scale length
+        TL = np.array(quad_points["TL"], dtype=np.float32)
+        TR = np.array(quad_points["TR"], dtype=np.float32)
+        BL = np.array(quad_points["BL"], dtype=np.float32)
+        BR = np.array(quad_points["BR"], dtype=np.float32)
+        # Calculate average scale length (in pixels)
+        top_len = np.linalg.norm(TR - TL)
+        bottom_len = np.linalg.norm(BR - BL)
+        scale_length = (top_len + bottom_len) / 2.0
+        print(f"Scale length: {scale_length}")
+
+        # Draw 12 frets with realistic distances along the full scale (vertical)
+        num_frets = 12
+
+        # Vectors along the left and right edges (nut → bridge)
+        left_edge_vec  = BL - TL
+        right_edge_vec = BR - TR
+
+        print (left_edge_vec)
+        print (right_edge_vec)
+
+        prev_frac = 0  # start at the nut
+        for n in range(1, num_frets + 1):
+            # distance from previous fret along the remaining scale
+            fret_frac = prev_frac + (1 - prev_frac) / 17.817
+
+            # Compute fret positions along left and right edges
+            fret_left  = TL + left_edge_vec * fret_frac *2
+            fret_right = TR + right_edge_vec * fret_frac *2
+
+            # Draw vertical fret line
+            cv2.line(display, tuple(fret_left.astype(int)), tuple(fret_right.astype(int)), (0, 255, 255), 2)
+            
+            # Draw fret number
+            cv2.putText(display, f"{n}", tuple((fret_left + [5, -5]).astype(int)),
+                        cv2.FONT_HERSHEY_SIMPLEX, 0.5, (0, 255, 255), 1)
+            
+            prev_frac = fret_frac
+
+        # for n in range(1, num_frets + 1):
+        #     # Fractional distance from bridge to nut for nth fret
+        #     frac = 1 / (2 ** (n / 12.0))
+            
+        #     # Compute fret position along the left and right edges
+        #     fret_left  = BL - left_edge_vec * frac 
+        #     fret_right = BR - right_edge_vec * frac
+
+        #     # Draw vertical fret line
+        #     cv2.line(display, tuple(fret_left.astype(int)), tuple(fret_right.astype(int)), (0, 255, 255), 2)
+            
+        #     # Draw fret number slightly above the left edge
+        #     cv2.putText(display, f"{n}", tuple((fret_left + [5, -5]).astype(int)),
+        #                 cv2.FONT_HERSHEY_SIMPLEX, 0.5, (0, 255, 255), 1)
+
+
+        #cv2.imshow("ArUco Detection", display)
         # Interpolate strings between left and right edges
-        left_edge  = np.linspace(quad_points["BR"], quad_points["BL"], 6)
-        right_edge = np.linspace(quad_points["TR"], quad_points["TL"], 6)
+        upper_edge  = np.linspace(quad_points["BR"], quad_points["BL"], 6)
+        lower_edge = np.linspace(quad_points["TR"], quad_points["TL"], 6)
 
         for i in range(6):
-            p1 = tuple(left_edge[i].astype(int))
-            p2 = tuple(right_edge[i].astype(int))
+            p1 = tuple(upper_edge[i].astype(int))
+            p2 = tuple(lower_edge[i].astype(int))
 
             cv2.line(display, p1, p2, (155,255,0), 2)
 
@@ -101,5 +157,3 @@ while True:
 
 cap.release()
 cv2.destroyAllWindows()
-
-
