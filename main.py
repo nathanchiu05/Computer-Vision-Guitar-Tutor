@@ -31,7 +31,7 @@ while True:
         fret_xs = [x for (x,y) in fret_positions]
         string_ys = [y for (x,y) in string_positions]
 
-        def nearest(value, candidates, threshold=10):
+        def nearest(value, candidates, threshold=50):
             """Find nearest candidate within threshold, return None if too far"""
             if not candidates:
                 return None
@@ -55,14 +55,14 @@ while True:
                 fret_idx += 1
                 note_text = f"{name}: String {string_labels[string_idx]}, Fret {fret_idx}"
                 print(note_text)
-                cv2.putText(display, note_text, (x+10, y-10),
-                            cv2.FONT_HERSHEY_SIMPLEX, 0.5, (255,255,255), 2)
+                # cv2.putText(display, note_text, (x+10, y-10),
+                #             cv2.FONT_HERSHEY_SIMPLEX, 0.5, (255,255,255), 2)
             else:
                 # Finger is not near any string - show as open/not playing
                 note_text = f"{name}: Not on string"
                 print(note_text)
-                cv2.putText(display, note_text, (x+10, y-10),
-                            cv2.FONT_HERSHEY_SIMPLEX, 0.5, (128,128,128), 2)
+                # cv2.putText(display, note_text, (x+10, y-10),
+                #             cv2.FONT_HERSHEY_SIMPLEX, 0.5, (128,128,128), 2)
 
             cv2.circle(display, (x, y), 8, (0, 255, 0), -1)
 
