@@ -8,7 +8,7 @@ aruco_dict = aruco.getPredefinedDictionary(aruco.DICT_4X4_1000)
 parameters = aruco.DetectorParameters()
 detector = aruco.ArucoDetector(aruco_dict, parameters)
 
-valid_ids = {0,1,2,3}
+valid_ids = {0, 1, 2, 3}
 history = {i: deque(maxlen=5) for i in valid_ids}
 last_seen = {}
 
@@ -16,7 +16,8 @@ last_seen = {}
 string_labels = ["E", "A", "D", "G", "B", "E"]
 
 def map_guitar(frame):
-    """Process a frame, detect ArUco fretboard, draw frets + strings, return annotated display."""
+    """Process a frame, detect ArUco fretboard, draw frets + strings, 
+    return annotated display + fret/string positions."""
     h, w = frame.shape[:2]
     gray = cv2.cvtColor(frame, cv2.COLOR_BGR2GRAY)
     corners, ids, _ = detector.detectMarkers(gray)
@@ -55,6 +56,9 @@ def map_guitar(frame):
                 elif mid == 3: quad_points["BL"] = c[2]
 
     # draw fretboard if complete
+    fret_positions = []
+    string_positions = []
+
     if len(quad_points) == 4:
         pts = np.array([quad_points["TL"], quad_points["TR"],
                         quad_points["BR"], quad_points["BL"]], dtype=np.int32)
@@ -68,6 +72,7 @@ def map_guitar(frame):
         left_edge_vec  = BL - TL
         right_edge_vec = BR - TR
 
+        # frets
         prev_frac = 0
         num_frets = 12
         for n in range(1, num_frets + 1):
@@ -77,8 +82,11 @@ def map_guitar(frame):
             cv2.line(display, tuple(fret_left.astype(int)), tuple(fret_right.astype(int)), (0, 255, 255), 2)
             cv2.putText(display, f"{n}", tuple((fret_left + [5, -5]).astype(int)),
                         cv2.FONT_HERSHEY_SIMPLEX, 0.5, (0, 255, 255), 1)
+
+            fret_positions.append((int(fret_left[0]), int(fret_left[1])))  # store x,y of left edge
             prev_frac = fret_frac
 
+        # strings
         upper_edge  = np.linspace(quad_points["BR"], quad_points["BL"], 6)
         lower_edge  = np.linspace(quad_points["TR"], quad_points["TL"], 6)
 
@@ -90,4 +98,6 @@ def map_guitar(frame):
             # cv2.putText(display, string_labels[i], label_pos,
             #             cv2.FONT_HERSHEY_SIMPLEX, 0.8, (255,255,255), 2)
 
-    return display
+            string_positions.append(((p1[0]+p2[0])//2, (p1[1]+p2[1])//2))  # midpoint
+
+    return display, fret_positions, string_positions
