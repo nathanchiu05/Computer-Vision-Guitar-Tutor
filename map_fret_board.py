@@ -84,6 +84,7 @@ while True:
         TR = np.array(quad_points["TR"], dtype=np.float32)
         BL = np.array(quad_points["BL"], dtype=np.float32)
         BR = np.array(quad_points["BR"], dtype=np.float32)
+
         # Calculate average scale length (in pixels)
         top_len = np.linalg.norm(TR - TL)
         bottom_len = np.linalg.norm(BR - BL)
@@ -101,6 +102,9 @@ while True:
         print (right_edge_vec)
 
         prev_frac = 0  # start at the nut
+        fret_positions = []  # store left & right points for each fret
+
+
         for n in range(1, num_frets + 1):
             # distance from previous fret along the remaining scale
             fret_frac = prev_frac + (1 - prev_frac) / 17.817
@@ -115,7 +119,8 @@ while True:
             # Draw fret number
             cv2.putText(display, f"{n}", tuple((fret_left + [5, -5]).astype(int)),
                         cv2.FONT_HERSHEY_SIMPLEX, 0.5, (0, 255, 255), 1)
-            
+            # Store for later finger detection
+            fret_positions.append((fret_left, fret_right))
             prev_frac = fret_frac
 
         # for n in range(1, num_frets + 1):
@@ -139,10 +144,12 @@ while True:
         upper_edge  = np.linspace(quad_points["BR"], quad_points["BL"], 6)
         lower_edge = np.linspace(quad_points["TR"], quad_points["TL"], 6)
 
+        string_positions = []  # store (left_pt, right_pt) for each string
+
         for i in range(6):
             p1 = tuple(upper_edge[i].astype(int))
             p2 = tuple(lower_edge[i].astype(int))
-
+            string_positions.append((p1, p2))
             cv2.line(display, p1, p2, (155,255,0), 2)
 
             # Put string label on left side
@@ -154,6 +161,17 @@ while True:
 
     if cv2.waitKey(1) & 0xFF == 27:
         break
+
+
+def detect_finger_position(x, y, x1, y1, x2, y2):
+    # Detects which string and fret a finger is pressing based on its (x, y) position.
+    # Returns: (string, fret) or None if finger is not on the fretboard.
+    # x: x-coordinate of finger position
+    # y: y-coordinate of finger position
+    # scale_length: length of the fretboard scale in pixels
+    # scale_height: height of the fretboard scale in pixels
+    return None
+
 
 cap.release()
 cv2.destroyAllWindows()
