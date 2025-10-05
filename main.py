@@ -20,28 +20,26 @@ while True:
         break
 
     h, w = frame.shape[:2]
-    zoom_factor = 1.65   #zoomfacto
+    zoom_factor = 1.00   #zoomfacto
     new_w, new_h = int(w / zoom_factor), int(h / zoom_factor)
     x1, y1 = (w - new_w) // 2, (h - new_h) // 2
     x2, y2 = x1 + new_w, y1 + new_h
     cropped = frame[y1:y2, x1:x2]
     frame = cv2.resize(cropped, (w, h))
 
-    # --- Run guitar mapping ---
+    #keep a copy of the raw frame
+    raw_frame = frame.copy()
+
+    # run guitar mapping for visuals
     display = map_guitar(frame)
 
-    # --- Run hand mapping (only one hand) ---
-    display, fingertips, landmarks_list = get_fingertip_positions(display)
+    # run hand mapping on raw frame (NOT display)
+    _, fingertips, landmarks_list = get_fingertip_positions(raw_frame)
 
     # Draw fingertip dots (flat dict now)
     for name, (x, y) in fingertips.items():
         cv2.circle(display, (x, y), 8, (0, 255, 0), -1)
-        # optional label
-        # cv2.putText(display, name, (x+10, y-10),
-        #             cv2.FONT_HERSHEY_SIMPLEX, 0.6, (255,255,255), 2)
 
-    #flip for mirror view
-    display = cv2.flip(display, 1)
     cv2.imshow("Hand + Guitar Tracking", display)
 
     if cv2.waitKey(1) & 0xFF == 27:  # ESC to exit
