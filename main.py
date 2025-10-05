@@ -13,7 +13,7 @@ custom_connections = [conn for conn in mp_hands.HAND_CONNECTIONS if conn not in 
 
 string_labels = ["E", "A", "D", "G", "B", "E"]
 
-cap = cv2.VideoCapture(1)
+cap = cv2.VideoCapture(0)
 
 current_chord = "C"  # <-- set this dynamically if needed
 
@@ -115,19 +115,20 @@ while True:
     elif key == ord('1'):
         current_chord = "A"
     elif key == ord('2'):
-        current_chord = "Bm"
+        current_chord = "Am"
     elif key == ord('3'):
         current_chord = "C"
     elif key == ord('4'):
         current_chord = "D"
     elif key == ord('5'):
-        current_chord = "E"
+        current_chord = "Dm"
     elif key == ord('6'):
-        current_chord = "F"
+        current_chord = "E"
     elif key == ord('7'):
-        current_chord = "G"
+        current_chord = "Em"
     elif key == ord('8'):
-        current_chord = "Am"
+        current_chord = "G"
+
 
 cap.release()
 cv2.destroyAllWindows()
