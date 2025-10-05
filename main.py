@@ -1,45 +1,50 @@
 import cv2
 import mediapipe as mp
 from map_hands import get_fingertip_positions
+from map_fret_board import map_guitar
 
 mp_hands = mp.solutions.hands
 mp_draw = mp.solutions.drawing_utils
 
-# Remove thumb connections (0-1, 1-2, 2-3, 3-4)
+# remove thumb connections from skeleton
 thumb_indices = {(0,1), (1,2), (2,3), (3,4)}
 custom_connections = [
     conn for conn in mp_hands.HAND_CONNECTIONS if conn not in thumb_indices
 ]
 
-cap = cv2.VideoCapture(0) # webcam input
+cap = cv2.VideoCapture(0)
 
 while True:
     ret, frame = cap.read()
     if not ret:
         break
 
-    # Get flipped frame, fingertip coords, and landmarks
-    frame, fingertips, landmarks_list = get_fingertip_positions(frame)
+    h, w = frame.shape[:2]
+    zoom_factor = 1.65   #zoomfacto
+    new_w, new_h = int(w / zoom_factor), int(h / zoom_factor)
+    x1, y1 = (w - new_w) // 2, (h - new_h) // 2
+    x2, y2 = x1 + new_w, y1 + new_h
+    cropped = frame[y1:y2, x1:x2]
+    frame = cv2.resize(cropped, (w, h))
 
-    # Debug print
-    print(fingertips)
+    # --- Run guitar mapping ---
+    display = map_guitar(frame)
 
-    # Draw skeleton without thumb
-    for hand_landmarks in landmarks_list:
-        mp_draw.draw_landmarks(frame, hand_landmarks, custom_connections)
+    # --- Run hand mapping (only one hand) ---
+    display, fingertips, landmarks_list = get_fingertip_positions(display)
 
-    # Draw fingertip dots with Left/Right labels
-    for hand_label, fingers in fingertips.items():
-        for name, (x, y) in fingers.items():
-            # color left vs right differently
-            color = (0, 255, 0) if hand_label == "Left" else (0, 0, 255)
-            cv2.circle(frame, (x, y), 8, color, -1)
-            # cv2.putText(frame, f"{hand_label}-{name}", (x+10, y-10),
-            #             cv2.FONT_HERSHEY_SIMPLEX, 0.6, (255,255,255), 2)
+    # Draw fingertip dots (flat dict now)
+    for name, (x, y) in fingertips.items():
+        cv2.circle(display, (x, y), 8, (0, 255, 0), -1)
+        # optional label
+        # cv2.putText(display, name, (x+10, y-10),
+        #             cv2.FONT_HERSHEY_SIMPLEX, 0.6, (255,255,255), 2)
 
-    cv2.imshow("Hand Tracking", frame)
+    #flip for mirror view
+    display = cv2.flip(display, 1)
+    cv2.imshow("Hand + Guitar Tracking", display)
 
-    if cv2.waitKey(1) & 0xFF == 27:  # esc to exit
+    if cv2.waitKey(1) & 0xFF == 27:  # ESC to exit
         break
 
 cap.release()
