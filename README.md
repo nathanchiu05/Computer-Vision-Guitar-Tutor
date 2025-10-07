@@ -1,4 +1,3 @@
-@ -1,176 +0,0 @@
 # Computer Vision Guitar Tutor
 
 A real-time guitar learning application that uses computer vision to track your hand positions and provide visual feedback on chord accuracy. The system uses ArUco markers to map the guitar fretboard and MediaPipe for hand tracking to help you learn guitar chords with immediate visual feedback.
