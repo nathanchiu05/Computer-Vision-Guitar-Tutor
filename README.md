@@ -155,14 +155,6 @@ Computer-Vision-Guitar-Tutor/
    - Ensure proper camera positioning
    - Check ArUco marker calibration
 
-## Contributing
-
-Contributions are welcome! Please feel free to submit pull requests or open issues for:
-- Additional chord support
-- Improved accuracy algorithms
-- UI/UX enhancements
-- Performance optimizations
-
 ## License
 
 This project is open source and available under the [MIT License](LICENSE).
