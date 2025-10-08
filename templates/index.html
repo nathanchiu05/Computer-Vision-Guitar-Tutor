@@ -1,0 +1,117 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>AI Guitar Tutor</title>
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        body {
+            background: #0a0a0a;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            color: #fff;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            padding: 20px;
+        }
+        h1 {
+            margin-bottom: 20px;
+            color: #00ff00;
+            text-shadow: 0 0 10px rgba(0,255,0,0.5);
+        }
+        #video-container {
+            position: relative;
+            border: 3px solid #00ff00;
+            border-radius: 10px;
+            overflow: hidden;
+            box-shadow: 0 0 30px rgba(0,255,0,0.3);
+        }
+        #video-feed {
+            display: block;
+            max-width: 100%;
+            height: auto;
+        }
+        .controls {
+            margin-top: 20px;
+            display: flex;
+            gap: 10px;
+            flex-wrap: wrap;
+            justify-content: center;
+        }
+        button {
+            background: #00ff00;
+            color: #000;
+            border: none;
+            padding: 12px 24px;
+            border-radius: 5px;
+            cursor: pointer;
+            font-size: 16px;
+            font-weight: bold;
+            transition: all 0.3s;
+        }
+        button:hover {
+            background: #00cc00;
+            transform: scale(1.05);
+            box-shadow: 0 0 20px rgba(0,255,0,0.5);
+        }
+        button:active {
+            transform: scale(0.95);
+        }
+        .chord-buttons {
+            display: flex;
+            gap: 8px;
+            flex-wrap: wrap;
+        }
+        .chord-btn {
+            padding: 10px 20px;
+            font-size: 14px;
+        }
+        .info {
+            margin-top: 20px;
+            background: rgba(0,255,0,0.1);
+            border: 1px solid #00ff00;
+            padding: 15px;
+            border-radius: 5px;
+            max-width: 800px;
+        }
+    </style>
+</head>
+<body>
+    <h1>🎸 AI Guitar Tutor</h1>
+    
+    <div id="video-container">
+        <img id="video-feed" src="{{ url_for('video_feed') }}" alt="Video Feed">
+    </div>
+    
+    <div class="controls">
+        <div class="chord-buttons">
+            <button class="chord-btn" onclick="setChord('C')">C Major</button>
+            <button class="chord-btn" onclick="setChord('D')">D Major</button>
+            <button class="chord-btn" onclick="setChord('E')">E Major</button>
+            <button class="chord-btn" onclick="setChord('G')">G Major</button>
+            <button class="chord-btn" onclick="setChord('A')">A Major</button>
+            <button class="chord-btn" onclick="setChord('Em')">E Minor</button>
+            <button class="chord-btn" onclick="setChord('Am')">A Minor</button>
+            <button class="chord-btn" onclick="setChord('Dm')">D Minor</button>
+        </div>
+    </div>
+    
+    <div class="info">
+        <h3>Instructions:</h3>
+        <ol>
+            <li>Position your guitar fretboard in view</li>
+            <li>Click 4 corners of fretboard (you'll need to implement this)</li>
+            <li>Place your hand on the fretboard</li>
+            <li>Practice the displayed chord!</li>
+        </ol>
+        <p><strong>Note:</strong> Click chord buttons above to change chords</p>
+    </div>
+    
+    <script>
+        function setChord(chord) {
+            fetch(`/set_chord/${chord}`)
+                .then(r => r.json())
+                .then(data => console.log('Chord set:', data));
+        }
+    </script>
+</body>
+</html>
